@@ -88,15 +88,20 @@ def byName() :
         else :
           print(i.grades)
 
-def averageGrade() : 
+#Prints the average grade of all users inputted into "allNames" array
+def averageGrade() :
   averages = []
   allNames = ["enterName"]
+  
   for member in allNames : 
+    #Get user
     getToken = baseToken + member
     TOKEN = os.environ.get(getToken, 0)
     canvas_api = canvasapi.Canvas(BASEURL, TOKEN)
     user = canvas_api.get_user('self')
     courses = user.get_enrollments(enrollment_state='active') 
+    
+    #Calculate personal avaerage and append it to averages
     amt = 0
     average = 0
     for course in courses : 
@@ -106,13 +111,14 @@ def averageGrade() :
     average = average / amt
     averages.append(average)
 
+  #Calculate average of all personal averages and print
   result = 0
   for i in averages : 
     result += i
   result /= len(averages)
   print("average = ", result)
 
-
+#Main 
 index = 1
 for i in startOptions : 
   print(index, i, sep = ". ")
