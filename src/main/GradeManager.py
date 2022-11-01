@@ -3,46 +3,39 @@ import string
 import dotenv
 import os
 import canvasapi
-import wx
+import GMCommonFuncs as com
+import pprint
+import json
+from flask import Flask, request, render_template
 
-dotenv.load_dotenv(dotenv.find_dotenv())
 BASEURL = 'https://kent.instructure.com'
 baseToken = "CANVAS_API_TOKEN_"
-startOptions = ["Grades By Name", "Average Grade"]
 
-#Sorts courses in same order of enrollments to match up when showing all grades
-#TODO: Optimize (cur: O(n^2))
-def sort(enroll, courses) :
-  result = []
-  for i in enroll : 
-    for j in courses : 
-      if (i.course_id == j.id) :
-        result.append(j)
-      
-  return result
+class User : 
+  def __init__(self,name) : 
+    name = name.replace(" ", '')
+    name = name.upper()
+    combineNameToken = baseToken + name
+    TOKEN = os.environ.get(combineNameToken, 0)
+    if (not TOKEN) :
+      com.ERROR_HANDLER(1, name)
+    canvas = canvasapi.Canvas(BASEURL, TOKEN)
+    user = canvas.get_user('self')
+    #Assign User attributes
+    self.canvas = canvas
+    self.user = user
+    self.enrollments = self.user.get_enrollments(enrollment_state='active')
+    self.courses = self.canvas.get_courses(enrollment_state='active')
+  
 
 
-def byName() : 
-  nameToken = input("Enter name: ")
-  nameToken = nameToken.replace(" ", '')
-  nameToken = nameToken.upper()
-  getToken = baseToken + nameToken
+def byName(user) : 
 
-  TOKEN = os.environ.get(getToken, 0)
-  if not TOKEN : 
-    print("Error: No user with name " + nameToken + " exists.")
-    exit(-1)
+  enroll = user.enrollments
 
-  canvas_api = canvasapi.Canvas(BASEURL, TOKEN)
+  courses = user.courses
 
-  result = canvas_api.get_user('self')
-  print(result)
-
-  enroll = result.get_enrollments(enrollment_state='active')
-
-  courses = canvas_api.get_courses(enrollment_state='active')
-
-  courses = sort(enroll, courses)
+  courses = com.sort(enroll, courses)
 
   courseList = [] 
 
@@ -88,20 +81,15 @@ def byName() :
         else :
           print(i.grades)
 
-#Prints the average grade of all users inputted into "allNames" array
-def averageGrade() :
+def averageGrade() : 
   averages = []
-  allNames = ["enterName"]
-  
+  allNames = ["ASHTONCORSELLO", "GADIBANDLER"]
   for member in allNames : 
-    #Get user
     getToken = baseToken + member
     TOKEN = os.environ.get(getToken, 0)
     canvas_api = canvasapi.Canvas(BASEURL, TOKEN)
     user = canvas_api.get_user('self')
     courses = user.get_enrollments(enrollment_state='active') 
-    
-    #Calculate personal avaerage and append it to averages
     amt = 0
     average = 0
     for course in courses : 
@@ -111,23 +99,34 @@ def averageGrade() :
     average = average / amt
     averages.append(average)
 
-  #Calculate average of all personal averages and print
   result = 0
   for i in averages : 
     result += i
   result /= len(averages)
   print("average = ", result)
 
-#Main 
-index = 1
-for i in startOptions : 
-  print(index, i, sep = ". ")
-  index = index + 1
-start = int(input("Input: "))
-if (start == 1) :
-  byName()
-if (start == 2) :
-  averageGrade()
-
-
-
+def gradeBelow(minGrade, allNames) : 
+  result = dict()
+  for index, member in enumerate(allNames, start=1) : 
+    com.LOADING(index, len(allNames))
+    getToken = baseToken + member
+    TOKEN = os.environ.get(getToken, 0)
+    canvas_api = canvasapi.Canvas(BASEURL, TOKEN)
+    user = canvas_api.get_user('self')
+    courses = user.get_enrollments(enrollment_state='active') 
+    classNames = user.get_courses(enrollment_state="active")
+    classNames = com.sort(courses, classNames)
+    for name, course in zip(classNames,courses) : 
+      if ('current_score' in course.grades and isinstance(course.grades['current_score'],float)) :
+        if (course.grades['current_score'] <= minGrade) :
+          if (user not in result) : 
+            result[user] = []
+          strGrade = str(course.grades['current_score'])
+          result[user].append(str(name.name + ' = ' + strGrade + '%'))
+  
+  for k, d in result.items() : 
+    print(k)
+    for i in d : 
+      print('\t',i, end='\n')
+  
+  return json.dumps(result)
