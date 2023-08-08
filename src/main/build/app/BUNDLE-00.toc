@@ -1,0 +1,3 @@
+([('app',
+   '/Users/ashton/Documents/GradeManager/src/main/dist/app',
+   'EXECUTABLE')],)

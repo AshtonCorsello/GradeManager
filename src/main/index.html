@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <link rel="stylesheet" href="/site/css/stylesheet.css">
+        <script src="/site/js/main.js"></script>
+    </head>
+
+    <body>
+
+        <div id="colorBlock">
+            <div id="title">
+                <h1>ALPHA SIGMA PHI GRADE MANAGER</h1>
+            </div>
+            <img id="logo" src="/site/img/logo.webp"/>
+            <img id="logo2" src="/site/img/logo.webp"/>
+        </div>
+
+        <table id="result">
+            <tr>
+                <th>room_num</th>
+                <th>building_name</th>
+            </tr>
+        </table>
+    </body>
+</html>
+    <script>
+        let roomsData = {{ result | safe }}; // pulls data from Python as 2d array
+        var str = "";
+        var columnVal = "";
+        roomsData.forEach(printData); // runs printData() on each row in table
+        function printData(roomsData) { 
+            str += "<tr><td><a href='{{ url_for('room_logs', columnVal='roomsData') }}''".replace("roomsData", roomsData[0]);
+            for(var i = 0; i < roomsData.length - 1; i++) { // loops through all columns in row
+                str += "<td> " + roomsData[i] + " </td>"; // appends column data with ', ' and puts in innerHTML
+    
+                if(i == 0) {
+                    str += "</td></a>"
+                }
+            }
+            
+    
+            str += "<td>" + roomsData[roomsData.length - 1] + "</td>"; // appends last column item without ','
+            str += "</tr>"; // closes tag in innerHTML
+        }
+        document.getElementById("result").innerHTML += str;
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

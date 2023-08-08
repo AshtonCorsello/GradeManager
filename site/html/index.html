@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesheet.css') }}" />
+    </head>
+
+    <body>
+
+        <div id="colorBlock">
+            <div id="title">
+                <h1>ALPHA SIGMA PHI GRADE MANAGER</h1>
+            </div>
+            <img id="logo" src="{{ url_for('static', filename='img/logo.webp') }}"/>
+            <img id="logo2" src="{{ url_for('static', filename='img/logo.webp') }}"/>
+        </div>
+
+        <div id="gradeBelowArea">
+            <h2>Find All Grades Below A Certain Grade</h2>
+            <form action="/gradeBelow/" method="post">
+                <input type="number" name="grade" placeholder="Enter Grade">
+                <input type="checkbox" name="brothers" id="brothers" value="brothers">
+                <label for="brothers">Brothers</label>
+                <input type="checkbox" name="pledges" id="pledges" value="pledges">
+                <label for="pledges">Pledges</label>
+                <button name="gradeBelowbtn" type="submit">Submit</button>
+
+            </form>
+
+            <textarea id="gradeArea" rows="30" cols="30"></textarea>
+        </div>
+
+        <div id="searchByNameArea">
+            <h2>Search by Name</h2>
+            <form action="/byName/" method="post">
+                <input type="text" name="name" placeholder="Enter Name">
+                <button name="nameSearch" type="submit">Submit</button>
+            </form>
+            <textarea id="nameArea" rows="30" cols="30"></textarea>
+        </div>
+    </body>
+</html>
+
+<script>
+
+    let myData = {{data | safe}};
+    var str = "";
+
+    if (myData) {
+        for (var key of Object.keys(myData)) {
+            str += key + "\n";
+            for (var grades of Object.keys(myData[key])) {
+                str += "\t" + myData[key][grades] + "\n";
+            }
+            str += "\n";
+        }
+
+        document.getElementById('gradeArea').value = str;
+    }
+    
+    
+</script>
+
+<script>
+     let nameInfo = {{nameData | safe}};
+     var str2 = ""; 
+    if (nameInfo) {
+        for (var key of Object.keys(nameInfo)) {
+            for (var grades of Object.keys(nameInfo[key])) {
+                str2 += nameInfo[key][grades]+ "\n"; 
+            }
+        }
+        console.log("str2 = " + str2);
+        document.getElementById('nameArea').value = str2; 
+    }
+</script>
+

@@ -1,0 +1,1 @@
+create table users ( id integer primary key AUTOINCREMENT , canvas_token varchar(255), first_name varchar ( 255 ) , last_name varchar (255),  email varchar ( 255 ) , pledge bool DEFAULT 0, admin bool DEFAULT 0, created_at datetime , updated_at datetime , deleted_at datetime )
